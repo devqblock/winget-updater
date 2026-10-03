@@ -46,11 +46,24 @@ jobs:
           ## 🚀 WingetUpdater ${{ github.ref_name }}
           New version automatically published!
           
-          ### 🔒 Verificación de Integridad (SHA256)
+          ### 🔒 Integrity Verification (SHA256)
           You can verify that the executable has not been modified by comparing it with this hash or downloading the `checksums.txt` file:
           
           ```text
-          ${{ steps.crypto.outputs.sha_hash }}  WingetUpdater.exe
+          ${{ steps.crypto.outputs.sha_hash }}
+          ```
+          Open a terminal in your Downloads folder and run the corresponding command to verify that the file is authentic:
+          
+          #### 💻 PowerShell
+          ```powershell
+          if ((Get-FileHash .\WingetUpdater.exe -Algorithm SHA256).Hash.ToLower() -eq "\${{ steps.crypto.outputs.sha_hash }}") { Write-Host "✓ Correct hash. The file is safe." -ForegroundColor Green } else { Write-Host "✗ ERROR: The hash does not match. File may be modified or corrupt." -ForegroundColor Red }
           ```
           
-          _Generated automatically via GitHub Actions._
+          #### 📟 Command Prompt (CMD)
+          ```cmd
+          certutil -hashfile WingetUpdater.exe SHA256
+          ```
+          _(In CMD, you will need to visually verify that the output line matches the official hash above exactly)._
+          
+          ---
+          _Generated automatically by GitHub Actions._
