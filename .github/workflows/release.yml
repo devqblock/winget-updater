@@ -3,10 +3,10 @@ name: Compilar y Publicar Release Automático
 on:
   push:
     tags:
-      - 'v*' # Se activa al subir etiquetas como v1.1.0, v2.0.0, etc.
+      - 'v*'
 
 permissions:
-  contents: write # Permiso obligatorio para crear el release y subir archivos
+  contents: write
 
 jobs:
   build:
@@ -35,32 +35,35 @@ jobs:
 
     - name: Crear Release y subir archivos
       uses: softprops/action-gh-release@v2
+      env:
+        VERSION_NAME: \${{ github.ref_name }}
+        HASH_VALUE: \${{ steps.crypto.outputs.sha_hash }}
       with:
         files: |
           dist/WingetUpdater-\${{ github.ref_name }}.exe
           dist/checksums.txt
         name: WingetUpdater \${{ github.ref_name }}
         body: |
-          ## 🚀 WingetUpdater \${{ github.ref_name }}
+          ## 🚀 WingetUpdater env.VERSION_NAME
           ¡Nueva versión publicada automáticamente!
           
           ### 🔒 Verificación de Integridad (SHA256)
           El hash SHA256 oficial para esta versión es:
           ```text
-          \${{ steps.crypto.outputs.sha_hash }}
+          env.HASH_VALUE
           ```
           
           Abre una terminal en tu carpeta de descargas y ejecuta el comando correspondiente para verificar que el archivo es auténtico:
           
           #### 💻 PowerShell
           ```powershell
-          Get-FileHash .\WingetUpdater-\${{ github.ref_name }}.exe -Algorithm SHA256
+          Get-FileHash .\WingetUpdater-env.VERSION_NAME.exe -Algorithm SHA256
           ```
           _(Compara que el resultado coincida exactamente con el hash oficial de arriba)._
           
           #### 📟 Símbolo del sistema (CMD)
           ```cmd
-          certutil -hashfile WingetUpdater-\${{ github.ref_name }}.exe SHA256
+          certutil -hashfile WingetUpdater-env.VERSION_NAME.exe SHA256
           ```
           _(Compara que el resultado coincida exactamente con el hash oficial de arriba)._
           
