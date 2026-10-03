@@ -16,7 +16,7 @@ jobs:
     - name: Download source code
       uses: actions/checkout@v4
 
-    - name: Set up Python
+    - name: Configure Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.x'
@@ -30,10 +30,12 @@ jobs:
       run: |
         pyinstaller --clean --noconfirm --onefile --windowed --name WingetUpdater-\${{ github.ref_name }} --icon icono.ico --add-data "icono.ico;." --manifest admin.manifest WingetUpdater.py
 
-    - name: Generate SHA256 Hash (Python Universal)
+    - name: Generate SHA256 Hash (Secure Python)
       id: crypto
+      env:
+        TAG_VERSION: \${{ github.ref_name }}
       run: |
-         python -c "import hashlib, os; exe_name = 'WingetUpdater-\${{ github.ref_name }}.exe'; h = hashlib.sha256(open(f'dist/{exe_name}','rb').read()).hexdigest(); open('dist/checksums.txt','w').write(f'{h}  {exe_name}\n'); f = open(os.environ['GITHUB_OUTPUT'], 'a'); f.write(f'sha_hash={h}\n'); f.close()"
+        python -c "import hashlib, os; version = os.environ['TAG_VERSION']; exe_name = f'WingetUpdater-{version}.exe'; h = hashlib.sha256(open(f'dist/{exe_name}','rb').read()).hexdigest(); open('dist/checksums.txt','w').write(f'{h}  {exe_name}\n'); f = open(os.environ['GITHUB_OUTPUT'], 'a'); f.write(f'sha_hash={h}\n'); f.close()"
 
     - name: Create Release and upload files
       uses: softprops/action-gh-release@v2
@@ -47,23 +49,24 @@ jobs:
           New version automatically published!
           
           ### 🔒 Integrity Verification (SHA256)
-          You can verify that the executable has not been modified by comparing it with this hash or downloading the `checksums.txt` file:
-          
+          The official SHA256 hash for this version is:
           ```text
           ${{ steps.crypto.outputs.sha_hash }}
           ```
-          Open a terminal in your Downloads folder and run the corresponding command to verify that the file is authentic:
+          
+          Open a terminal in your downloads folder and run the corresponding command to verify that the file is authentic:
           
           #### 💻 PowerShell
           ```powershell
-          if ((Get-FileHash .\WingetUpdater-\${{ github.ref_name }}.exe -Algorithm SHA256).Hash.ToLower() -eq "${{ steps.crypto.outputs.sha_hash }}") { Write-Host "✓ Correct hash. The file is safe." -ForegroundColor Green } else { Write-Host "✗ ERROR: The hash does not match. File may be modified or corrupt." -ForegroundColor Red }
+          Get-FileHash .\WingetUpdater-${{ github.ref_name }}.exe -Algorithm SHA256
           ```
+          _(Compare that the result matches exactly with the official hash above)._
           
           #### 📟 Command Prompt (CMD)
           ```cmd
-          certutil -hashfile WingetUpdater.exe SHA256
+          certutil -hashfile WingetUpdater-${{ github.ref_name }}.exe SHA256
           ```
-          _(In CMD, you will need to visually verify that the output line matches the official hash above exactly)._
+          _(Compare that the result matches exactly with the official hash above)._
           
           ---
           _Generated automatically by GitHub Actions._
