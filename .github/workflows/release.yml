@@ -3,7 +3,7 @@ name: Compilar y Publicar Release Automático
 on:
   push:
     tags:
-      - 'v*' # Se activa cuando subes una etiqueta como v1.0.4, v1.1, etc.
+      - 'v*' # Se activa cuando subes una etiqueta como v1.0.6, v1.1, etc.
 
 permissions:
   contents: write # Permiso obligatorio para crear el release y subir archivos
@@ -34,15 +34,15 @@ jobs:
       id: crypto
       shell: powershell
       run: |
-        # Calculamos el hash del ejecutable en minúsculas
-        \$calcHash = (Get-FileHash dist/WingetUpdater.exe -Algorithm SHA256).Hash.ToLower()
-        echo "Hash de seguridad: \$calcHash"
+        # Calculamos el hash del ejecutable en minúsculas de forma nativa
+        \$hashResult = (Get-FileHash dist/WingetUpdater.exe -Algorithm SHA256).Hash.ToLower()
+        Write-Output "Hash de seguridad: \$hashResult"
         
         # Creamos el archivo checksums.txt dentro de dist/
-        "\$calcHash  WingetUpdater.exe" | Out-File -FilePath dist/checksums.txt -Encoding ascii
+        "\$hashResult  WingetUpdater.exe" | Out-File -FilePath dist/checksums.txt -Encoding ascii
         
-        # Guardamos el hash de forma segura en las variables de entorno de GitHub
-        echo "sha_hash=calcHash" >> env:GITHUB_OUTPUT
+        # Guardamos el hash de forma segura en las variables de entorno de GitHub utilizando el formato oficial
+        "sha_hash=hashResult" | Out-File -FilePath env:GITHUB_OUTPUT -Append
 
     - name: Crear Release y subir archivos
       uses: softprops/action-gh-release@v2
