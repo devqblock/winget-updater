@@ -1,4 +1,4 @@
-name: Compilar y Publicar Release Automático
+name: Compile and Publish Automatic Release
 
 on:
   push:
@@ -13,20 +13,20 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Descargar el código fuente
+    - name: Download the source code
       uses: actions/checkout@v4
 
-    - name: Configurar Python
+    - name: Configure Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.x'
 
-    - name: Instalar PyInstaller y dependencias
+    - name: Install PyInstaller and dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pyinstaller
 
-    - name: Ejecutar script de compilacion y publicacion completa
+    - name: Run compilation and publishing script
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
