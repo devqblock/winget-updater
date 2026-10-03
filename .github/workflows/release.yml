@@ -50,7 +50,7 @@ jobs:
           You can verify that the executable has not been modified by comparing it with this hash or downloading the `checksums.txt` file:
           
           ```text
-          \${{ steps.crypto.outputs.sha_hash }}  WingetUpdater.exe
+          ${{ steps.crypto.outputs.sha_hash }}  WingetUpdater.exe
           ```
           
           _Generated automatically via GitHub Actions._
