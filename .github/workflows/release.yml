@@ -1,0 +1,65 @@
+name: Compilar y Publicar Release Automático
+
+on:
+  push:
+    tags:
+      - 'v*' # Se activa cuando subes una etiqueta como v1.0.4, v1.1, etc.
+
+permissions:
+  contents: write # Permiso obligatorio para crear el release y subir archivos
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Descargar el código fuente
+      uses: actions/checkout@v4
+
+    - name: Configurar Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Instalar PyInstaller
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+
+    - name: Compilar ejecutable con PyInstaller
+      run: |
+        pyinstaller --clean --noconfirm --onefile --windowed --name WingetUpdater --icon icono.ico --add-data "icono.ico;." --manifest admin.manifest WingetUpdater.py
+
+    - name: Generar Hash SHA256 (Windows PowerShell)
+      id: crypto
+      shell: powershell
+      run: |
+        # Calculamos el hash del ejecutable en minúsculas
+        \$calcHash = (Get-FileHash dist/WingetUpdater.exe -Algorithm SHA256).Hash.ToLower()
+        echo "Hash de seguridad: \$calcHash"
+        
+        # Creamos el archivo checksums.txt dentro de dist/
+        "\$calcHash  WingetUpdater.exe" | Out-File -FilePath dist/checksums.txt -Encoding ascii
+        
+        # Guardamos el hash de forma segura en las variables de entorno de GitHub
+        echo "sha_hash=calcHash" >> env:GITHUB_OUTPUT
+
+    - name: Crear Release y subir archivos
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          dist/WingetUpdater.exe
+          dist/checksums.txt
+        name: WingetUpdater \${{ github.ref_name }}
+        body: |
+          ## 🚀 WingetUpdater \${{ github.ref_name }}
+          ¡Nueva versión publicada automáticamente!
+          
+          ### 🔒 Verificación de Integridad (SHA256)
+          Puedes verificar que el ejecutable no ha sido modificado comparándolo con este hash o descargando el archivo `checksums.txt`:
+          
+          ```text
+          \${{ steps.crypto.outputs.sha_hash }}  WingetUpdater.exe
+          ```
+          
+          _Generado automáticamente mediante GitHub Actions._
