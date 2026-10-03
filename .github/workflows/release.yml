@@ -21,51 +21,13 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Instalar PyInstaller
+    - name: Instalar PyInstaller y dependencias
       run: |
         python -m pip install --upgrade pip
         pip install pyinstaller
 
-    - name: Ejecutar script de compilación y hash
-      id: crypto
+    - name: Ejecutar script de compilacion y publicacion completa
       env:
-        TAG_VERSION: \${{ github.ref_name }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         python github_build.py
-
-    - name: Crear Release y subir archivos
-      uses: softprops/action-gh-release@v2
-      env:
-        VERSION_NAME: \${{ github.ref_name }}
-        HASH_VALUE: \${{ steps.crypto.outputs.sha_hash }}
-      with:
-        files: |
-          dist/WingetUpdater-\${{ github.ref_name }}.exe
-          dist/checksums.txt
-        name: WingetUpdater \${{ github.ref_name }}
-        body: |
-          ## 🚀 WingetUpdater env.VERSION_NAME
-          ¡Nueva versión publicada automáticamente!
-          
-          ### 🔒 Verificación de Integridad (SHA256)
-          El hash SHA256 oficial para esta versión es:
-          ```text
-          env.HASH_VALUE
-          ```
-          
-          Abre una terminal en tu carpeta de descargas y ejecuta el comando correspondiente para verificar que el archivo es auténtico:
-          
-          #### 💻 PowerShell
-          ```powershell
-          Get-FileHash .\WingetUpdater-env.VERSION_NAME.exe -Algorithm SHA256
-          ```
-          _(Compara que el resultado coincida exactamente con el hash oficial de arriba)._
-          
-          #### 📟 Símbolo del sistema (CMD)
-          ```cmd
-          certutil -hashfile WingetUpdater-env.VERSION_NAME.exe SHA256
-          ```
-          _(Compara que el resultado coincida exactamente con el hash oficial de arriba)._
-          
-          ---
-          _Generado automáticamente mediante GitHub Actions._
