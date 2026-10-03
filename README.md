@@ -3,6 +3,20 @@
 A Windows desktop application that helps developers check for and update
 installed applications using WinGet, Windows' native package manager.
 
+![WinGet Updater Interface](screenshot.png)
+
+## 📥 Download & Verification
+
+To download the latest stable version and verify its integrity:
+
+1. Go to the **[Releases](../../releases)** section on the right side of this repository.
+2. Download the `WingetUpdater.exe` executable and the accompanying `checksums.txt`.
+3. Open **PowerShell** in your downloads folder and verify that the executable code hasn't been modified by running:
+   ```powershell
+   Get-FileHash .\WingetUpdater.exe -Algorithm SHA256
+   ```
+4. Compare the generated hash string with the one inside `checksums.txt` or listed directly on the Release description page.
+
 ## Features
 
 - Checks for available updates when the application starts.
