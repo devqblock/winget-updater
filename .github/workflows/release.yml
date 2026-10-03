@@ -28,18 +28,18 @@ jobs:
 
     - name: Compile executable with PyInstaller
       run: |
-        pyinstaller --clean --noconfirm --onefile --windowed --name WingetUpdater --icon icono.ico --add-data "icono.ico;." --manifest admin.manifest WingetUpdater.py
+        pyinstaller --clean --noconfirm --onefile --windowed --name WingetUpdater-\${{ github.ref_name }} --icon icono.ico --add-data "icono.ico;." --manifest admin.manifest WingetUpdater.py
 
     - name: Generate SHA256 Hash (Python Universal)
       id: crypto
       run: |
-        python -c "import hashlib, os; h = hashlib.sha256(open('dist/WingetUpdater.exe','rb').read()).hexdigest(); open('dist/checksums.txt','w').write(f'{h}  WingetUpdater.exe\n'); f = open(os.environ['GITHUB_OUTPUT'], 'a'); f.write(f'sha_hash={h}\n'); f.close()"
+         python -c "import hashlib, os; exe_name = 'WingetUpdater-\${{ github.ref_name }}.exe'; h = hashlib.sha256(open(f'dist/{exe_name}','rb').read()).hexdigest(); open('dist/checksums.txt','w').write(f'{h}  {exe_name}\n'); f = open(os.environ['GITHUB_OUTPUT'], 'a'); f.write(f'sha_hash={h}\n'); f.close()"
 
     - name: Create Release and upload files
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          dist/WingetUpdater.exe
+          dist/WingetUpdater-\${{ github.ref_name }}.exe
           dist/checksums.txt
         name: WingetUpdater ${{ github.ref_name }}
         body: |
@@ -56,7 +56,7 @@ jobs:
           
           #### 💻 PowerShell
           ```powershell
-          if ((Get-FileHash .\WingetUpdater.exe -Algorithm SHA256).Hash.ToLower() -eq "${{ steps.crypto.outputs.sha_hash }}") { Write-Host "✓ Correct hash. The file is safe." -ForegroundColor Green } else { Write-Host "✗ ERROR: The hash does not match. File may be modified or corrupt." -ForegroundColor Red }
+          if ((Get-FileHash .\WingetUpdater-\${{ github.ref_name }}.exe -Algorithm SHA256).Hash.ToLower() -eq "${{ steps.crypto.outputs.sha_hash }}") { Write-Host "✓ Correct hash. The file is safe." -ForegroundColor Green } else { Write-Host "✗ ERROR: The hash does not match. File may be modified or corrupt." -ForegroundColor Red }
           ```
           
           #### 📟 Command Prompt (CMD)
