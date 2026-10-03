@@ -3,7 +3,7 @@ name: Compilar y Publicar Release Automático
 on:
   push:
     tags:
-      - 'v*' # Se activa cuando subes una etiqueta como v1.0.6, v1.1, etc.
+      - 'v*' # Se activa al subir etiquetas como v1.0.7, v1.1, etc.
 
 permissions:
   contents: write # Permiso obligatorio para crear el release y subir archivos
@@ -30,19 +30,10 @@ jobs:
       run: |
         pyinstaller --clean --noconfirm --onefile --windowed --name WingetUpdater --icon icono.ico --add-data "icono.ico;." --manifest admin.manifest WingetUpdater.py
 
-    - name: Generar Hash SHA256 (Windows PowerShell)
+    - name: Generar Hash SHA256 (Python Universal)
       id: crypto
-      shell: powershell
       run: |
-        # Calculamos el hash del ejecutable en minúsculas de forma nativa
-        \$hashResult = (Get-FileHash dist/WingetUpdater.exe -Algorithm SHA256).Hash.ToLower()
-        Write-Output "Hash de seguridad: \$hashResult"
-        
-        # Creamos el archivo checksums.txt dentro de dist/
-        "\$hashResult  WingetUpdater.exe" | Out-File -FilePath dist/checksums.txt -Encoding ascii
-        
-        # Guardamos el hash de forma segura en las variables de entorno de GitHub utilizando el formato oficial
-        "sha_hash=hashResult" | Out-File -FilePath env:GITHUB_OUTPUT -Append
+        python -c "import hashlib, os; h = hashlib.sha256(open('dist/WingetUpdater.exe','rb').read()).hexdigest(); open('dist/checksums.txt','w').write(f'{h}  WingetUpdater.exe\n'); f = open(os.environ['GITHUB_OUTPUT'], 'a'); f.write(f'sha_hash={h}\n'); f.close()"
 
     - name: Crear Release y subir archivos
       uses: softprops/action-gh-release@v2
