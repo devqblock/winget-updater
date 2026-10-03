@@ -33,13 +33,13 @@ jobs:
     - name: Generate SHA256 Hash (Python Universal)
       id: crypto
       run: |
-        python -c "import hashlib, os; h = hashlib.sha256(open('dist/WingetUpdater_${{ github.ref_name }}.exe','rb').read()).hexdigest(); open('dist/checksums.txt','w').write(f'{h}  WingetUpdater_${{ github.ref_name }}.exe\n'); f = open(os.environ['GITHUB_OUTPUT'], 'a'); f.write(f'sha_hash={h}\n'); f.close()"
+        python -c "import hashlib, os; h = hashlib.sha256(open('dist/WingetUpdater.exe','rb').read()).hexdigest(); open('dist/checksums.txt','w').write(f'{h}  WingetUpdater.exe\n'); f = open(os.environ['GITHUB_OUTPUT'], 'a'); f.write(f'sha_hash={h}\n'); f.close()"
 
     - name: Create Release and upload files
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          dist/WingetUpdater_${{ github.ref_name }}.exe
+          dist/WingetUpdater.exe
           dist/checksums.txt
         name: WingetUpdater ${{ github.ref_name }}
         body: |
@@ -56,12 +56,12 @@ jobs:
           
           #### 💻 PowerShell
           ```powershell
-          if ((Get-FileHash .\WingetUpdater_${{ github.ref_name }}.exe -Algorithm SHA256).Hash.ToLower() -eq "${{ steps.crypto.outputs.sha_hash }}") { Write-Host "✓ Correct hash. The file is safe." -ForegroundColor Green } else { Write-Host "✗ ERROR: The hash does not match. File may be modified or corrupt." -ForegroundColor Red }
+          if ((Get-FileHash .\WingetUpdater.exe -Algorithm SHA256).Hash.ToLower() -eq "${{ steps.crypto.outputs.sha_hash }}") { Write-Host "✓ Correct hash. The file is safe." -ForegroundColor Green } else { Write-Host "✗ ERROR: The hash does not match. File may be modified or corrupt." -ForegroundColor Red }
           ```
           
           #### 📟 Command Prompt (CMD)
           ```cmd
-          certutil -hashfile WingetUpdater_${{ github.ref_name }}.exe SHA256
+          certutil -hashfile WingetUpdater.exe SHA256
           ```
           _(In CMD, you will need to visually verify that the output line matches the official hash above exactly)._
           
