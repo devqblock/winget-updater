@@ -56,7 +56,7 @@ jobs:
           
           #### 💻 PowerShell
           ```powershell
-          if ((Get-FileHash .\WingetUpdater.exe -Algorithm SHA256).Hash.ToLower() -eq "\${{ steps.crypto.outputs.sha_hash }}") { Write-Host "✓ Correct hash. The file is safe." -ForegroundColor Green } else { Write-Host "✗ ERROR: The hash does not match. File may be modified or corrupt." -ForegroundColor Red }
+          if ((Get-FileHash .\WingetUpdater.exe -Algorithm SHA256).Hash.ToLower() -eq "${{ steps.crypto.outputs.sha_hash }}") { Write-Host "✓ Correct hash. The file is safe." -ForegroundColor Green } else { Write-Host "✗ ERROR: The hash does not match. File may be modified or corrupt." -ForegroundColor Red }
           ```
           
           #### 📟 Command Prompt (CMD)
