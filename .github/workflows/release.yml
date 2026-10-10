@@ -30,9 +30,25 @@ jobs:
       # Inject the Tag version into the source code.
       # =========================================================================
       - name: Inject current tag version into Python code
-        shell: powershell
+        shell: python
         run: |
-          python -c "import re; f = open('WingetUpdater.py', 'r', encoding='utf-8'); c = f.read(); f.close(); c = re.sub(r'VERSION_ACTUAL\s*=\s*[\"\'\'][^\"\'\']+[\"\'\']', 'VERSION_ACTUAL = \"${{ github.ref_name }}\"', c); f = open('WingetUpdater.py', 'w', encoding='utf-8'); f.write(c); f.close()"
+          import re
+
+          file_path = "WingetUpdater.py"
+          tag_version = "${{ github.ref_name }}"
+
+          # Read the original content
+          with open(file_path, "r", encoding="utf-8") as f:
+              content = f.read()
+              
+          # Replace the VERSION_ACTUAL constant with the one from the GitHub tag.
+          new_content = re.sub(r'VERSION_ACTUAL\s*=\s*["\'][^"\']+["\']', f'VERSION_ACTUAL = "{tag_version}"', content)
+
+          # Save the changes to the file
+          with open(file_path, "w", encoding="utf-8") as f:
+              f.write(new_content)
+              
+          print(f"--- [SUCCESS] Version {tag_version} successfully injected into the source code ---")
 
       - name: Run compilation and publishing script
         env:
