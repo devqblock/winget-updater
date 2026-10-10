@@ -90,3 +90,7 @@ itself. Review interactive operations and WinGet messages. Use this
 application at your own risk.
 
 See [LICENSE.md](LICENSE.md) for the license terms and disclaimer.
+
+## Note
+
+If you want to download the executable file and are a bit "paranoid," remember to click the "three dots" and select "Keep" so the browser downloads it 😉
