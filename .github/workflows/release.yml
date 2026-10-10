@@ -3,7 +3,7 @@ name: Compile and Publish Automatic Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
@@ -13,21 +13,34 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Download the source code
-      uses: actions/checkout@v4
+      - name: Download the source code
+        uses: actions/checkout@v4
 
-    - name: Configure Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.x'
+      - name: Configure Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
 
-    - name: Install PyInstaller and dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pyinstaller
+      - name: Install PyInstaller and dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
 
-    - name: Run compilation and publishing script
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        python github_build.py
+      # =========================================================================
+      # Inject the Tag version into the source code.
+      # =========================================================================
+      - name: Inject current tag version into Python code
+        shell: powershell
+        run: |
+          tag = "{{ github.ref_name }}"
+          \$filePath = "WingetUpdater.py"
+          echo "Injecting tag version into file filePath..."
+
+          # We read the file and replace the version constant using regular expressions.
+          (Get-Content \$filePath) -replace 'VERSION_ACTUAL\s*=\s*["''][^"'']+["'']', "VERSION_ACTUAL = `"$tag`"" | Set-Content \$filePath
+
+      - name: Run compilation and publishing script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python github_build.py
