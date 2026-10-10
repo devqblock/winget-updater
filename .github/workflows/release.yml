@@ -32,12 +32,7 @@ jobs:
       - name: Inject current tag version into Python code
         shell: powershell
         run: |
-          tag = "{{ github.ref_name }}"
-          \$filePath = "WingetUpdater.py"
-          echo "Injecting tag version into file filePath..."
-
-          # We read the file and replace the version constant using regular expressions.
-          (Get-Content \$filePath) -replace 'VERSION_ACTUAL\s*=\s*["''][^"'']+["'']', "VERSION_ACTUAL = `"$tag`"" | Set-Content \$filePath
+          python -c "import re; f = open('WingetUpdater.py', 'r', encoding='utf-8'); c = f.read(); f.close(); c = re.sub(r'VERSION_ACTUAL\s*=\s*[\"\'\'][^\"\'\']+[\"\'\']', 'VERSION_ACTUAL = \"${{ github.ref_name }}\"', c); f = open('WingetUpdater.py', 'w', encoding='utf-8'); f.write(c); f.close()"
 
       - name: Run compilation and publishing script
         env:
